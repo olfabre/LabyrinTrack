@@ -24,6 +24,16 @@ J'ai créé une classe `Labyrinthe`qui charge et stocke la grille du labyrinthe 
 
 
 
+### Implémentation du backtracking séquentiel
+
+ici nous allons essayer de coder un programme qui énumérer l'ensemble des  possibilités pour résoudre les différents labyrinthes. 
+
+Je vais donc réaliser une fonctione récursive qui explore tous les chemins possibles du labyrinthe à partir de la position de départ `D`  jusqu'à la position finale `A` tout en collectant de façon obligatoire des objets (`C,B,E`) en revenant en arrière dès que l'on rencontre :
+
+- un mur qui sera représenté par `#`
+- une case déjà visitée
+- une impasse donc un chemin sans issue
+
 
 
 

@@ -23,6 +23,7 @@ public:
     Labyrinthe() : largeur(0), hauteur(0) {}
 
     // Charge le labyrinthe depuis un fichier texte
+    // on lit et on parse le fichier avec un structure de matrice de caractères
     bool chargerDepuisFichier(const std::string &nomFichier) {
         std::ifstream fichier(nomFichier);
         if (!fichier.is_open()) {
