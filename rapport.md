@@ -8,6 +8,10 @@ L'implémentation sera réalisé en C++11. On utilisera une compilation qui a é
 
 ```bash
 g++ -Wall -g3 main.cpp -o labyrinthe
+
+ou plutôt
+
+g++ -std=c++11 -Wall -g3 main.cpp -o labyrinthe
 ```
 
 
