@@ -7,6 +7,7 @@
 #include <iostream>
 #include "Position.hpp"
 
+
 class Labyrinthe {
 public:
     // Grille du labyrinthe

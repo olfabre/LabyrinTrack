@@ -14,13 +14,59 @@ ou plutôt
 g++ -std=c++11 -Wall -g3 main.cpp -o labyrinthe
 ```
 
+pour info, `-Wall` sert à **activer presque tous les avertissements (warnings)** lors de la compilation.
+
+
+
+### Création CMakeLists
+
+```txt
+cmake_minimum_required(VERSION 3.10)
+
+# Nom du projet
+project(Labyrinthe)
+
+# Standard C++11 et options de compilation
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# Options de compilation similaires à ta commande
+add_compile_options(-Wall -Wextra -Werror -g3)
+
+# Fichiers sources (ajoute ici tous les fichiers nécessaires)
+set(SOURCES
+    main.cpp
+    Labyrinthe.cpp
+    # Ajoute ici d'autres fichiers sources si nécessaire
+)
+
+# Exécutable final
+add_executable(labyrinthe ${SOURCES})
+
+```
+
+
+
+génération et compilation
+
+```txt
+mkdir build
+
+cmake -S . -B build	Génère le projet dans le dossier build
+cmake --build build	Compile le projet dans le dossier build
+```
+
+
+
+
+
 
 
 ### Structure
 
 J'ai créé une classe `Position` qui va représenter une cellule spécifique du labyrinthe (contient les coordonnées x et y, son état et les objets collectés (des booléens indiquant si chaque objet couronne, bouclier, épée est collecté).
 
-J'ai créé une classe `Labyrinthe`qui charge et stocke la grille du labyrinthe depuis un fichier, identifie les points `D`  et `A`, vérifie les déplacements valides...
+J'ai créé une classe `Labyrinthe`qui charge et stocke la grille du labyrinthe depuis un fichier, identifie les points `D`  et `A`, vérifie les déplacements s'il sont valides ou pas...
 
 
 
