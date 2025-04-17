@@ -52,8 +52,8 @@ génération et compilation
 ```txt
 mkdir build
 
-cmake -S . -B build	Génère le projet dans le dossier build
-cmake --build build	Compile le projet dans le dossier build
+cmake -S . -B build	// Génère le projet dans le dossier build
+cmake --build build	// Compile le projet dans le dossier build
 ```
 
 
