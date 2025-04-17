@@ -462,7 +462,131 @@ public:
 
 
 
+```cpp
+void f() {
+    cout << "Je suis détaché..." << endl;
+}
 
+int main() {
+    thread t(f);
+    t.detach(); // Le thread devient indépendant
+}
+```
+
+🧠 Mais attention ! Si ton programme principal **finit trop vite**, le thread détaché **n’aura pas le temps de s’exécuter** !
+
+
+
+#### sleep_for
+
+ Faire une pause
+
+```cpp
+#include <chrono>
+#include <thread>
+
+this_thread::sleep_for(chrono::seconds(3)); // Attend 3 secondes
+```
+
+
+
+Exemple avec lambda et pause
+
+```cpp
+for (int i = 0; i < 5; i++) {
+    thread t([i] {
+        if (i == 0)
+            this_thread::sleep_for(chrono::seconds(5));
+        cout << "Thread #" << i << endl;
+    });
+    t.join(); // Important sinon le thread sera tué tout de suite
+}
+```
+
+
+
+
+#### Synchronisation
+
+
+
+### 💣 Pourquoi ?
+
+Tous les threads partagent la même mémoire → ils peuvent **écraser** les données.
+
+
+
+🧤 `mutex` (verrou) 
+
+exemple 
+
+```cpp
+#include <mutex>
+
+mutex m;
+int compteur = 0;
+
+void increment() {
+    for (int i = 0; i < 1000; i++) {
+        m.lock();
+        compteur++;
+        m.unlock();
+    }
+}
+```
+
+⚠️ Si tu oublies le `unlock()`, ça peut **bloquer à jamais** d'autres threads.
+
+
+
+
+
+✅ `lock_guard` (verrou automatique)
+
+exemple 
+
+```cpp
+void increment() {
+    for (int i = 0; i < 1000; i++) {
+        lock_guard<mutex> verrou(m);
+        compteur++;
+    }
+}
+```
+
+➡️ **Plus sûr**, car le mutex est libéré **automatiquement** à la fin du bloc `{}`.
+
+
+
+💎 `atomic`
+
+exemple
+
+```cpp
+#include <atomic>
+
+atomic<int> compteur(0);
+
+void increment() {
+    for (int i = 0; i < 1000; i++) {
+        compteur++;
+    }
+}
+```
+
+➡️ **Pas besoin de mutex !** Mais ça ne marche que pour des types simples (`int`, `bool`, etc.).
+
+
+
+
+
+#### Problèmes classiques rencontrés
+
+
+
+### 🌀 **Race Condition**
+
+Deux threads écrivent en **même temps** → résultat **imprévisible**.
 
 
 
