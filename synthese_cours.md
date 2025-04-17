@@ -297,7 +297,7 @@ Mais là, tu utilises une **classe personnalisée qui se comporte comme une fonc
 
 
 
-## 🎓 Pourquoi utiliser ça ?
+######  🎓 Pourquoi utiliser ça ?
 
 - Tu peux **garder des variables dans la classe** si tu veux qu’un thread ait un **état**.
 - Très pratique si tu veux créer des **tâches personnalisées et réutilisables**.
@@ -368,6 +368,101 @@ int main() {
 }
 
 ```
+
+
+
+📌 Attention : ici les threads partagent `c`, donc si plusieurs threads écrivent au **même endroit**, il faut **protéger** la mémoire (mutex, atomic… qu’on verra plus tard).
+
+
+
+#### Les fonctions **lambda** avec threads
+
+Une **lambda** c’est une **fonction anonyme** (sans nom) que tu définis **à la volée**.
+
+
+
+exemple simple
+
+```cpp
+auto action = []() {
+    cout << "Thread avec lambda" << endl;
+};
+
+thread t(action);
+t.join();
+```
+
+
+
+exemple fonction lambda avec paramètres
+
+```cpp
+auto action = [](int x, int y) {
+    cout << "Somme = " << x + y << endl;
+};
+
+thread t(action, 3, 4); // Affiche Somme = 7
+t.join();
+```
+
+
+
+exemple avec capture de vairiables
+
+```cpp
+int x = 2, y = 3;
+auto action = [x, y]() {
+    cout << "Produit = " << x * y << endl;
+};
+thread t(action);
+t.join();
+```
+
+
+
+exemple avec capture par référence (modifie la vraie variable)
+
+```cpp
+int somme = 0;
+auto action = [&somme]() {
+    for (int i = 0; i < 5; i++) somme += i;
+};
+thread t(action);
+t.join();
+cout << "Somme = " << somme << endl; // Somme = 10
+```
+
+
+
+exemple lambda dans une classe
+
+```cpp
+class Toto {
+private:
+    int somme = 0;
+
+public:
+    void fonction() {
+        auto action = [this]() {
+            for (int i = 0; i < 10; i++) somme += i;
+        };
+        thread t(action);
+        t.join();
+    }
+};
+```
+
+
+
+
+
+#### detach()
+
+💥 `detach` : le thread continue **en arrière-plan** tout seul.
+
+
+
+
 
 
 
