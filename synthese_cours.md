@@ -110,9 +110,19 @@ int* p = new int(5);
 
 
 
+###### 🌐 3. Les **variables globales**
 
+Elles sont partagées **par tous les threads**.
 
+```
+int compteur = 0;
 
+void incrementer() {
+    compteur++;
+}
+```
+
+📌 Si plusieurs threads modifient `compteur` **en même temps**, il y a des **problèmes** → c’est ce qu’on appelle une **condition de course (race condition)** 😱
 
 
 
