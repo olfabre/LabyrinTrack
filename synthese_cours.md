@@ -82,6 +82,40 @@ int main() {
 
 
 
+##### 🧠 La **pile**, le **tas**, les **variables globales**
+
+###### 📦 1. La **pile (stack)**
+
+C’est là où sont stockées :
+
+- Les **variables locales** à une fonction
+- Les **arguments** de fonction
+- Le **chemin d’exécution** (pour savoir où on est)
+
+📌 Chaque **thread a sa propre pile**. Donc les variables locales ne se mélangent pas !
+
+
+
+###### 🗃️ 2. Le **tas (heap)**
+
+C’est la **mémoire dynamique**. Par exemple quand tu fais :
+
+```
+int* p = new int(5);
+```
+
+⛲ Là, tu demandes un **int** sur le tas (heap), et tous les threads peuvent y accéder s’ils partagent le pointeur.
+
+📌 Le **tas est partagé** entre les threads : donc attention aux conflits !
+
+
+
+
+
+
+
+
+
 
 
 #### Processus lourd VS léger
