@@ -126,6 +126,52 @@ void incrementer() {
 
 
 
+##### ⚙️ Utiliser plusieurs **cœurs CPU** grâce aux threads
+
+Quand tu crées plusieurs threads, le système d’exploitation peut les faire tourner :
+
+- Soit sur le **même cœur**, un par un (tour par tour)
+- Soit sur **des cœurs différents en parallèle**, si ton CPU en a plusieurs
+
+### ➤ Exemple :
+
+Si tu as un **CPU à 4 cœurs**, tu peux lancer 4 threads qui s’exécutent **vraiment en même temps** 🧠🧠.
+
+🧪 Exemple C++11 avec plusieurs threads :
+
+
+
+```cpp
+#include <iostream>
+#include <thread>
+
+void travail(int id) {
+    std::cout << "Thread " << id << " travaille...\n";
+}
+
+int main() {
+    std::thread t1(travail, 1);
+    std::thread t2(travail, 2);
+
+    t1.join();
+    t2.join();
+
+    return 0;
+}
+
+```
+
+## 🎓 Bonnes pratiques pour débuter
+
+ ✅ Utilise des **fonctions simples** dans chaque thread
+ ✅ Fais attention au **partage de mémoire** (tas et variables globales)
+ ✅ Utilise des **verrous (mutex)** quand plusieurs threads écrivent dans la même donnée
+ ✅ **Toujours appeler `.join()`** pour attendre la fin du thread (sinon bug !)
+
+
+
+
+
 
 
 #### Processus lourd VS léger
@@ -141,3 +187,6 @@ void incrementer() {
 
 Processus : chacun avec sa mémoire
 Threads : partagent le tas et les variables globales
+
+
+
