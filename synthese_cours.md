@@ -161,18 +161,12 @@ int main() {
 
 ```
 
-## 🎓 Bonnes pratiques pour débuter
+##### 🎓 Bonnes pratiques pour débuter
 
  ✅ Utilise des **fonctions simples** dans chaque thread
  ✅ Fais attention au **partage de mémoire** (tas et variables globales)
  ✅ Utilise des **verrous (mutex)** quand plusieurs threads écrivent dans la même donnée
  ✅ **Toujours appeler `.join()`** pour attendre la fin du thread (sinon bug !)
-
-
-
-
-
-
 
 #### Processus lourd VS léger
 
@@ -187,6 +181,193 @@ int main() {
 
 Processus : chacun avec sa mémoire
 Threads : partagent le tas et les variables globales
+
+
+
+##### **Partage de mémoire entre threads**
+
+###### 📦 Les threads partagent :
+
+- Les **variables globales** (`int compteur`).
+- Le **tas** (`new`, `malloc`).
+
+###### 🧑‍🤝‍🧑 Chaque thread a :
+
+- Sa **propre pile (stack)** avec ses variables locales et registres.
+
+
+
+```mathematica
+Mémoire Partagée (tas, globales)
+├── Thread A : sa propre pile
+├── Thread B : sa propre pile
+├── Thread C : sa propre pile
+```
+
+
+
+exemple
+
+```cpp
+#include <iostream>
+#include <thread>
+using namespace std;
+
+int compteur = 0;
+
+void f() {
+    compteur += 1;
+}
+
+int main() {
+    thread t1(f);
+    thread t2(f);
+    t1.join();
+    t2.join();
+    cout << "Compteur = " << compteur << endl;
+    return 0;
+}
+```
+
+➡️ Ici, `compteur` est **partagé** par les deux threads. Ils peuvent l’**écraser** si on ne protège pas son accès (avec un mutex par exemple, mais ça vient après dans le cours).
+
+
+
+Tu peux aussi créer un thread **sans tâche**, et lui en attribuer une plus tard :
+
+```cpp
+thread u;
+u = thread(g, 20);
+u.join();
+```
+
+
+
+#### Operator()
+
+✅ À quoi ça sert ?
+
+En C++11, quand tu veux créer un `std::thread`, tu peux lui donner :
+
+- une **fonction**
+- un **lambda**
+- ou… un **objet qui se comporte comme une fonction** → **grâce à `operator()`**
+
+Exemple
+
+```cpp
+#include <iostream>
+#include <thread>
+using namespace std;
+
+class W {
+public:
+    void operator()() {
+        cout << "Opérateur () appelé" << endl;
+    }
+};
+
+int main() {
+    W zz;             // zz est un objet de type W
+    thread t(zz);     // on passe zz au thread -> comme une fonction !
+    t.join();         // on attend que le thread se termine
+    return 0;
+}
+```
+
+### Ce qu’il se passe :
+
+1. Tu crées un objet `zz` de type `W`.
+2. Tu dis : `thread t(zz);`
+   - Le thread regarde : "Est-ce que `zz` est **appelable** comme une fonction ?"
+   - Oui ! Parce qu’il a `operator()`.
+3. Le thread **exécute le contenu** de `operator()()` dans un thread séparé.
+
+💡 C’est comme si tu faisais :
+
+```cpp
+void f() {
+    cout << "Fonction appelée" << endl;
+}
+
+thread t(f); // même idée
+```
+
+Mais là, tu utilises une **classe personnalisée qui se comporte comme une fonction**.
+
+
+
+## 🎓 Pourquoi utiliser ça ?
+
+- Tu peux **garder des variables dans la classe** si tu veux qu’un thread ait un **état**.
+- Très pratique si tu veux créer des **tâches personnalisées et réutilisables**.
+
+exemple
+
+
+
+```cpp
+class Compteur {
+    int debut, fin;
+public:
+    Compteur(int d, int f) : debut(d), fin(f) {}
+
+    void operator()() {
+        for (int i = debut; i <= fin; ++i)
+            cout << i << " ";
+        cout << endl;
+    }
+};
+
+int main() {
+    Compteur c(1, 5); // Compteur de 1 à 5
+    thread t(c);      // Lancement dans un thread
+    t.join();
+    return 0;
+}
+
+🔍 Résultat :
+1 2 3 4 5
+```
+
+💡 Ici, tu vois qu’on peut **passer des données** à notre objet (`debut`, `fin`) et les utiliser dans `operator()`.
+
+| Élément         | Signification                                              |
+| --------------- | ---------------------------------------------------------- |
+| `operator()()`  | Permet à une classe de se **comporter comme une fonction** |
+| `thread t(zz);` | Crée un thread en lançant `zz.operator()()`                |
+| Avantage        | Tu peux garder des **données internes** dans la classe     |
+
+
+
+#### Parallèlisme avec 2 threads
+
+
+
+exemple
+
+
+
+```cpp
+vector<int> a = {1, 3, 5, 8};
+vector<int> b = {7, 3, 3, -4};
+vector<int> c(4);
+
+void add(int start, int end) {
+    for (int i = start; i < end; i++) {
+        c[i] = a[i] + b[i];
+    }
+}
+
+int main() {
+    thread t1(add, 0, 2); // traite indices 0 et 1
+    thread t2(add, 2, 4); // traite indices 2 et 3
+    t1.join();
+    t2.join();
+    return 0;
+}
+
+```
 
 
 
