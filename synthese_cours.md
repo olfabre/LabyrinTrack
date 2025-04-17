@@ -1,4 +1,6 @@
-## Cours sur le parallèlisme (Master ILSEN)
+# Cours sur le parallèlisme (Master ILSEN)
+
+## Aide mémoire pour mon évaluation
 
 
 
