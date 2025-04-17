@@ -584,9 +584,356 @@ void increment() {
 
 
 
-### 🌀 **Race Condition**
+🌀 **Race Condition**
 
 Deux threads écrivent en **même temps** → résultat **imprévisible**.
 
+```cpp
+int total = 500;
 
+void add(int x) {
+    total += x;
+}
+
+int main() {
+    thread t1(add, 50);
+    thread t2(add, 50);
+    t1.join();
+    t2.join();
+    cout << "Total = " << total << endl;
+}
+```
+
+💥 Résultat : parfois 600, parfois 550, etc. => il faut un `mutex` pour protéger.
+
+
+
+🧨 **Deadlock**
+
+Deux threads attendent **mutuellement** une ressource => **blocage total**.
+
+```cpp
+mutex m1, m2;
+
+void t1() {
+    m1.lock();
+    m2.lock();
+    // travail
+    m2.unlock();
+    m1.unlock();
+}
+
+void t2() {
+    m2.lock();
+    m1.lock();
+    // travail
+    m1.unlock();
+    m2.unlock();
+}
+```
+
+➡️ Solution : toujours **verrouiller dans le même ordre**.
+
+## 🧨 Deadlock : c’est quoi exactement ?
+
+Imagine deux **personnes** qui veulent chacune utiliser **deux fourchettes** pour manger 🍴🍴.
+
+- **Personne A** prend la **fourchette 1** et attend la **fourchette 2**.
+- **Personne B** prend la **fourchette 2** et attend la **fourchette 1**.
+
+💥 Résultat : **elles se bloquent à jamais**. Personne ne lâche sa fourchette. Personne ne peut manger. => **Deadlock** (blocage total).
+
+## 🧠 En programmation, c’est pareil :
+
+Tu as deux **threads** (tâches en parallèle), et deux **ressources** protégées par des **verrous** (`mutex`).
+
+### 🔐 Les `mutex`
+
+- Ce sont des **verrous**, pour éviter que deux threads écrivent en même temps dans une même mémoire.
+- `lock()` => je verrouille
+- `unlock()` => je déverrouille
+
+exemple de blockage avec deadlock
+
+```cpp
+#include <iostream>
+#include <thread>
+#include <mutex>
+using namespace std;
+
+mutex m1, m2;
+
+void t1() {
+    m1.lock();          // 🔒 thread t1 verrouille m1
+    this_thread::sleep_for(chrono::milliseconds(100));
+    m2.lock();          // 🧨 attend m2 qui est peut-être déjà pris !
+    cout << "t1 travaille" << endl;
+    m2.unlock();
+    m1.unlock();
+}
+
+void t2() {
+    m2.lock();          // 🔒 thread t2 verrouille m2
+    this_thread::sleep_for(chrono::milliseconds(100));
+    m1.lock();          // 🧨 attend m1 qui est peut-être déjà pris !
+    cout << "t2 travaille" << endl;
+    m1.unlock();
+    m2.unlock();
+}
+
+int main() {
+    thread a(t1);
+    thread b(t2);
+    a.join();
+    b.join();
+    return 0;
+}
+```
+
+🧨 Ce qu’il se passe ici :
+
+| Temps | Thread t1            | Thread t2            |
+| ----- | -------------------- | -------------------- |
+| 0 ms  | `m1.lock()`          | `m2.lock()`          |
+| 100ms | essaie `m2.lock()` ❌ | essaie `m1.lock()` ❌ |
+
+🔁 Les deux attendent indéfiniment = **DEADLOCK**.
+
+
+
+✅ Solution : verrouiller dans **le même ordre**
+
+Au lieu de :
+
+```cpp
+t1 → m1 puis m2  
+t2 → m2 puis m1 ❌ (ordre différent !)
+```
+
+On **force** les deux threads à toujours faire dans le même ordre, par exemple :
+
+```cpp
+void t1() {
+    m1.lock();
+    m2.lock();
+    // ...
+    m2.unlock();
+    m1.unlock();
+}
+
+void t2() {
+    m1.lock();  // 👈 même ordre que t1
+    m2.lock();
+    // ...
+    m2.unlock();
+    m1.unlock();
+}
+```
+
+💡 Résultat : pas de deadlock car personne ne reste bloqué en attendant quelque chose que l'autre possède **dans un ordre inverse**.
+
+
+
+🧪 Encore mieux : utiliser `std::lock`
+
+En C++11, tu peux faire :
+
+```cpp
+std::lock(m1, m2);
+```
+
+Cela verrouille **plusieurs mutex en toute sécurité**, sans deadlock possible.
+
+🔒 Exemple sûr avec `std::lock`
+
+```cpp
+void t1() {
+    std::lock(m1, m2);
+    lock_guard<mutex> lg1(m1, std::adopt_lock);
+    lock_guard<mutex> lg2(m2, std::adopt_lock);
+    // travail
+}
+```
+
+✅ `std::adopt_lock` dit : “les mutex sont déjà verrouillés, pas besoin de les verrouiller encore.”
+
+
+
+
+
+#### 🧍‍♂️ **Starvation**
+
+Un thread **attend trop longtemps** une ressource que les autres accaparent.
+
+Pas d’exemple direct ici, mais ça peut arriver si on priorise toujours les mêmes threads.
+
+
+
+
+
+### Patrons de conception
+
+
+
+#### 🪓 1. **Fork-Join**
+
+- **Fork** : le programme se divise en plusieurs threads.
+- **Join** : on attend que les threads aient fini avant de continuer.
+
+exemple
+
+```cpp
+void travail(int i) {
+    cout << "Thread " << i << " travaille" << endl;
+}
+
+int main() {
+    thread t1(travail, 1);
+    thread t2(travail, 2);
+    t1.join();
+    t2.join();
+    cout << "Tous les threads ont terminé" << endl;
+}
+```
+
+
+
+#### 👑 2. **Maître-Esclave**
+
+- Un thread **maître** donne du travail aux **esclaves** (workers).
+- Il gère la coordination.
+
+
+
+#### ☎️ 3. **Client-Serveur**
+
+- Le **serveur** répond à des requêtes venant de plusieurs **clients**.
+
+
+
+#### 🚰 4. **Pipeline**
+
+- Une tâche est découpée en **étapes successives**.
+- Chaque thread fait **une étape**, puis passe à la suivante.
+
+Exemple imagé :
+
+> Thread A fait "lire", Thread B fait "traiter", Thread C fait "enregistrer".
+
+
+
+#### 🧺 5. **Bassin de tâches / Producteur-Consommateur**
+
+- **Thread Pool** : plusieurs threads prêts à exécuter des tâches dès qu’elles sont disponibles.
+- **Producteur-Consommateur** :
+  - Le producteur met des données dans un **tampon**.
+  - Le consommateur lit les données du tampon.
+
+
+
+### Performance & Speedup
+
+
+
+## 🏎️ 1. **Pourquoi mesurer les performances ?**
+
+Quand tu écris un programme **parallèle** (avec plusieurs threads, plusieurs cœurs...), l’idée, c’est de le faire **plus rapide** que le même programme en version **séquentielle** (ligne par ligne, un seul cœur CPU).
+
+Mais... **est-ce que ça vaut le coup ?** 🤔
+ On a besoin d’un moyen pour **mesurer** le gain de vitesse. C’est là qu’arrive la notion de **speedup** !
+
+
+
+📊 2. **Qu’est-ce que le Speedup ?**
+
+
+
+🔢 Formule :
+
+
+
+```cpp
+Sp = Tseq / Tp
+```
+
+- `Tseq` = Temps d’exécution en **séquentiel** (sur 1 cœur)
+- `Tp` = Temps d’exécution en **parallèle**, avec `p` processeurs
+- `Sp` = le **gain de vitesse**
+
+### 
+
+un exemple 
+
+| Version             | Temps       |
+| ------------------- | ----------- |
+| Séquentiel          | 10 secondes |
+| Parallèle (4 cœurs) | 3 secondes  |
+
+Alors :
+
+```cpp
+Sp = 10 / 3 ≈ 3.33
+```
+
+➡️ Tu vas 3,33 fois plus vite avec 4 cœurs ! 💪
+
+
+
+🧠 3. L’idéal théorique
+
+> Si ton code est **parfaitement parallélisable**, alors :
+
+```
+Sp ≈ p
+```
+
+📌 Exemple : 4 cœurs ⇒ on pourrait espérer **4 fois plus rapide**.
+
+Mais... 😢 dans la vraie vie, **tout ne peut pas être parallélisé**. Et c’est là qu’intervient…
+
+
+
+📐 4. La **loi d’Amdahl** (⚠️ super importante)
+
+
+
+Elle dit :
+
+```cpp
+Speedup ≤ 1 / ((1 - S) + S / P)
+```
+
+`S` : pourcentage de ton code **parallélisable** (entre 0 et 1)
+
+`P` : nombre de processeurs (ou threads/cœurs)
+
+`1 - S` : partie du code qui **reste séquentielle**
+
+
+
+📌 Exemple : 90 % parallélisable (`S = 0.9`)
+
+
+
+| Nombre de cœurs `P` | Calcul du speedup                 | Résultat   |
+| ------------------- | --------------------------------- | ---------- |
+| 1                   | `1 / ((1 - 0.9) + 0.9/1) = 1`     | 1 (normal) |
+| 2                   | `1 / (0.1 + 0.9/2) = 1 / 0.55`    | ≈ 1.82     |
+| 4                   | `1 / (0.1 + 0.9/4) = 1 / 0.325`   | ≈ 3.08     |
+| 100                 | `1 / (0.1 + 0.9/100) = 1 / 0.109` | ≈ 9.17     |
+
+➡️ Même avec **100 processeurs**, tu ne dépasses pas **9,17x plus vite** ❗
+
+Pourquoi ? Parce que les **10 % restants** te **freinent** toujours !
+
+
+
+### 💡 Exemple
+
+Si 90 % de ton code est parallélisable (`S = 0.9`) :
+
+- avec 4 processeurs → speedup max ≈ 3.08
+- avec 100 processeurs → speedup max ≈ 9.17
+
+On voit que **ajouter plus de processeurs** n’aide plus passé un certain point ⚠️
 
