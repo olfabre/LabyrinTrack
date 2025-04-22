@@ -1,0 +1,6 @@
+===== Rapport de Résolution du Labyrinthe =====
+
+Chemin trouvé : NON
+Objets requis collectés : NON
+
+Aucun chemin valide trouvé.
