@@ -1,75 +1,100 @@
 #ifndef LABYRINTHE_HPP
 #define LABYRINTHE_HPP
 
-#include <vector>
-#include <string>
-#include <fstream>
-#include <iostream>
-#include "Position.hpp"
+// vector<ElementTypé> me permets de stocker des éléments d'un type
+// Je peux ajouter (push_back) ou supprimer (pop_back) et accéder à mes éléments facilement.
+// C'est un stack ou pile (Last-In First-Out).s
+
+#include <vector> // tableau dynamique
+#include <string> // chaine caractere
+#include "Position.hpp" // strcuture corrodonée & grille
+#include "Objet.hpp" // Les objets trouvés dans les grilles à ramasser
+#include "Couleurs.hpp"   // Lez couleurs d'affichage
 
 
+using namespace std;
+
+
+
+// Représentation d'une grille labyrinthe avec seulement les signatures des donctions.
+// Les implementations seront dans Labyrinthe.cpp
 class Labyrinthe {
+
 public:
-    // Grille du labyrinthe
-    std::vector<std::string> grille;
+    // Constructeur
+    Labyrinthe();
 
-    // Dimensions du labyrinthe
-    int largeur;
-    int hauteur;
+    // on charge le labyrinthe depuis le fichier sous format texte
+    void chargerDepuisFichier(const string& nomFichier);
 
-    // Position de départ et d'arrivée
-    Position depart{0, 0};
-    Position arrivee{0, 0};
+    // on résout le labyrinthe en trouvant un chemin
+    bool resoudre();
 
-    Labyrinthe() : largeur(0), hauteur(0) {}
+    // On affiche la grille actuelle sur el terminal
+    void afficher() const;
 
-    // Charge le labyrinthe depuis un fichier texte
-    // on lit et on parse le fichier avec un structure de matrice de caractères
-    bool chargerDepuisFichier(const std::string &nomFichier) {
-        std::ifstream fichier(nomFichier);
-        if (!fichier.is_open()) {
-            std::cerr << "Impossible d'ouvrir le fichier : " << nomFichier << std::endl;
-            return false;
-        }
-
-        std::string ligne;
-        grille.clear();
-
-        while (getline(fichier, ligne)) {
-            grille.push_back(ligne);
-        }
-
-        hauteur = grille.size();
-        largeur = hauteur > 0 ? grille[0].size() : 0;
-
-        // Identifier les positions de départ (D) et d'arrivée (A)
-        for (int i = 0; i < hauteur; ++i) {
-            for (int j = 0; j < largeur; ++j) {
-                if (grille[i][j] == 'D') {
-                    depart = Position(i, j);
-                } else if (grille[i][j] == 'A') {
-                    arrivee = Position(i, j);
-                }
-            }
-        }
-
-        fichier.close();
-        return true;
+    // On modifie la grille en cours
+    void setGrilleActuelle(int grille) {
+        grilleActuelle = grille;
     }
 
-    // Vérifie si une position est valide (dans la grille et non un mur)
-    bool estValide(int x, int y) const {
-        return x >= 0 && x < hauteur &&
-               y >= 0 && y < largeur &&
-               grille[x][y] != '#';
-    }
+private:
+    // On stocke plusieurs grilles
+    vector<vector<string>> labyrinthes;
 
-    // Affiche le labyrinthe (pour debug)
-    void afficher() const {
-        for (const auto &ligne : grille) {
-            std::cout << ligne << std::endl;
-        }
-    }
+    // Les positions de départ et d'arrivée dans la grille encours
+    Position depart;
+    Position arrivee;
+
+    // Chemin trouvé pour aller de départ à arrivée
+    vector<Position> chemin;
+
+    // on liste des objets à ramasser
+    vector<Objet> objets;
+
+    // Indice de l'objet qu'on doit ramasser pour les avoir dans l'ordre
+    int prochainObjet;
+
+    // Numéro de la grille en cours
+    int grilleActuelle;
+
+    // on vérifie si une position est bonne (dans le périmetre dy labyrinthe en cours)
+    bool estValide(const Position &pos) const;
+
+    // On vérifie si c'est la case est un mur
+    bool estObstacle(const Position &pos) const;
+
+    // On cérifie si la case est un objet
+    bool estObjet(const Position &pos) const;
+
+    // On vérifie si la case est un monstre 'M'
+    bool estMonstre(const Position &pos) const;
+
+    // On vérifie si la case est un passage (1 ou 2)
+    bool estPassage(const Position &pos) const;
+
+    // On vérifie si la case est une bombe TNT 'T'
+    bool estExplosion(const Position &pos) const;
+
+    // On vérifie si on peut ramasser l'objet maintnant
+    bool peutRamasserObjet(const Position& pos) const;
+
+    // On récupère le caractère dans la grille à une position précise
+    char getCase(const Position &pos) const;
+
+    // On moodifie le caractère dans la grille à une position  précise
+    void setCase(const Position &pos, char c);
+
+    // Algorithme de backtracking (cherche un chemin)
+    bool backtracking(const Position &pos, vector<Position> &cheminActuel);
+
+    // on marque le chemin trouvé dans la grille en mettant '*' dans la case
+    void marquerChemin();
+
+    // on vérifie si tous les objets sont ramassés
+    bool tousObjetsRamasses() const;
 };
+
+
 
 #endif
