@@ -36,7 +36,7 @@ int main()
         auto debut = chrono::high_resolution_clock::now();
 
         // action: resoudre le labyrinthe
-        bool resolution = labyrinthe.resoudre();
+        bool resolution = labyrinthe.trouverChemin();
 
         // Fin du chrono
         auto fin = chrono::high_resolution_clock::now();

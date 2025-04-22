@@ -28,7 +28,7 @@ public:
     void chargerDepuisFichier(const string& nomFichier);
 
     // on résout le labyrinthe en trouvant un chemin
-    bool resoudre();
+    bool trouverChemin();
 
     // On affiche la grille actuelle sur el terminal
     void afficher() const;
@@ -87,6 +87,10 @@ private:
 
     // Algorithme de backtracking (cherche un chemin)
     bool backtracking(const Position &pos, vector<Position> &cheminActuel);
+
+    // Algorithme de backtracking (cherche un chemin pour la grille speciale)
+    bool backtrackingGrilleParallele(const Position &position, vector<Position> &cheminActuel);
+
 
     // on marque le chemin trouvé dans la grille en mettant '*' dans la case
     void marquerChemin();
