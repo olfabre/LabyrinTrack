@@ -42,4 +42,4 @@ struct Position {
     }
 };
 
-#endif // POSITION_HPP
+#endif
