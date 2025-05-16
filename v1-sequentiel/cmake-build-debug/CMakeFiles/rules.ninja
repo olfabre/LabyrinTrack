@@ -42,7 +42,7 @@ rule CUSTOM_COMMAND
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake --regenerate-during-build -S/Users/olfabre/Desktop/threads/labyrinthe/Olivier_Fabre_code/v1-sequentiel -B/Users/olfabre/Desktop/threads/labyrinthe/Olivier_Fabre_code/v1-sequentiel/cmake-build-debug
+  command = /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake --regenerate-during-build -S"/Users/olfabre/Desktop/UNIVERSITE/MASTER2/Programmation parallèle/Projet/LabyrinTrack/v1-sequentiel" -B"/Users/olfabre/Desktop/UNIVERSITE/MASTER2/Programmation parallèle/Projet/LabyrinTrack/v1-sequentiel/cmake-build-debug"
   description = Re-running CMake...
   generator = 1
 

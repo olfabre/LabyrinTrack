@@ -1,4 +1,4 @@
-# Install script for directory: /Users/olfabre/Desktop/threads/labyrinthe/Olivier_Fabre_code/v1-sequentiel
+# Install script for directory: /Users/olfabre/Desktop/UNIVERSITE/MASTER2/Programmation parallèle/Projet/LabyrinTrack/v1-sequentiel
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/Users/olfabre/Desktop/threads/labyrinthe/Olivier_Fabre_code/v1-sequentiel/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/Users/olfabre/Desktop/UNIVERSITE/MASTER2/Programmation parallèle/Projet/LabyrinTrack/v1-sequentiel/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
